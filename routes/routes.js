@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router()
 const Model = require('../models/model');
 
-
 //Post Method
 // router.post('/post', (req, res) => {
 //     res.send('Post API')
