@@ -1,5 +1,7 @@
 const cookieParser = require('cookie-parser');
 const userRouter = require('./routes/userRoutes');
+const orderRouter = require('./routes/orderRoutes');
+const fileRouter = require('./routes/fileRoutes');
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -19,10 +21,12 @@ database.once('connected', () => {
 })
 const app = express();
 
-app.use(cors())
+app.use(cors({credentials:true, origin: 'http://localhost:3000'}))
 app.use(cookieParser());
 app.use(express.json());
 app.use('/user', userRouter)
+app.use('/order', orderRouter)
+app.use('/file', fileRouter)
 
 
 app.listen(3001, () => {

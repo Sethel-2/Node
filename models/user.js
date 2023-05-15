@@ -16,8 +16,23 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         enum: ["client", "certificator"],
-    }
-
+    },
+    firstName: {
+        required: true,
+        type: String,
+    },
+    lastName: {
+        required: true,
+        type: String,
+    },
+    phone: {
+        required: true,
+        type: String,
+    },
+    isVerified: {
+        default: false,
+        type: Boolean,
+    },
 })
 
 module.exports = mongoose.model('User', userSchema)

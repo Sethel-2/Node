@@ -1,21 +1,51 @@
 const { Router } = require ("express");
 const UserService = require ("../services/userService");
+const authenticateAccess = require("../utils/auth");
+const RequestError = require("../utils/error");
 
  const userRouter = Router();
 const userService = new UserService();
 
 userRouter.post('/', async (req, res) => {
-    console.log(req.body)
   try {
     const user = req.body;
-
-
     const createdUser = await userService.registerUser(user);
     res.json(createdUser);
   } catch (error) {
     res.status(error.statusCode ? error.statusCode : 500).json({ message: error.message });
   }
 });
+
+userRouter.post('/login', async (req, res) => {
+  try {
+    const {email, password} = req.body;
+    const {user,token} = await userService.login(email,password);
+    res.cookie("token", token, {
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: true,
+    });
+    res.json(user);
+  } catch (error) {
+    res.status(error.statusCode ? error.statusCode : 500).json({ message: error.message });
+  }
+});
+
+userRouter.post('/logout', async (req, res) => {
+      res.clearCookie("token");
+      res.json({ message: "User logged out" })
+});
+
+userRouter.put('/', authenticateAccess, async (req, res) => {
+  try {
+    const user = req.body;
+    if (user.id !== req.user.id) throw new RequestError("Prieigos klaida", 403);
+    const updatedUser = userService.put(req.params.id, user);
+    res.json(updatedUser)
+  } catch (error) {
+    res.status(error.statusCode ? error.statusCode : 500).json({ message: error.message });
+  }
+});
+
 userRouter.get('/', async (req, res) => {
     res.json("eradsf")
   //Get all of the saved collections in the database
@@ -60,26 +90,5 @@ userRouter.delete('/:id', async (req, res) => {
 //     res.status(400).json({ message: error.message });
 //   }
 });
-
-userRouter.post('/login', async (req, res) => {
-    try {
-      const {email, password} = req.body;
-      console.log(email,password)
-      const {user,token} = await userService.login(email,password);
-      res.cookie("token", token, {
-        maxAge: 1000 * 60 * 60 * 24,
-        httpOnly: true,
-      });
-      res.json(user);
-    } catch (error) {
-      res.status(error.statusCode ? error.statusCode : 500).json({ message: error.message });
-    }
-  });
-
-  userRouter.post('/logout', async (req, res) => {
-        res.clearCookie("token");
-        res.json({ message: "User logged out" })
-  });
-
 
 module.exports = userRouter;

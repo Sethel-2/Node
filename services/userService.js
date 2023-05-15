@@ -20,6 +20,7 @@ require('dotenv').config();
         await createdUser.save();
         return createdUser;
     }
+
     async login(
         email,
         password,
@@ -31,15 +32,34 @@ require('dotenv').config();
         if (!matches) {
           throw new RequestError("Nepavyko prisijungti", 401);
         }
+
+        // TODO: uncomment after email verification is implemented
+        // if (!user.isVerified) throw new RequestError("Paskyra nepatvirtinta", 400);
        
         const token = jwt.sign(
-          { id: user._id },
+          { id: user._id, role: user.role },
           process.env.ACCESS_TOKEN_SECRET,
           {
             expiresIn: "1d",
           }
         );
         return { user, token};
+      }
+
+      async put(id, user) {
+        const { password, ...newUser } = user;
+        if (password) newUser.passwordHash = await bcrypt.hash(password, 10);
+    
+        const oldUser = await this._users.findById(id);
+        if (oldUser === null) throw new RequestError("Naudotojas nerastas", 404);
+        const emailUser = await this._users.findOne({ email: user.email });
+        if (oldUser.email !== user.email && emailUser !== null)
+          throw new RequestError("El. paštas užimtas", 400);
+    
+        Object.assign(oldUser, newUser);
+        await oldUser.save();
+    
+        return oldUser;
       }
   }
   
