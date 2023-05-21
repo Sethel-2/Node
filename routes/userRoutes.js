@@ -6,6 +6,15 @@ const RequestError = require("../utils/error");
  const userRouter = Router();
 const userService = new UserService();
 
+userRouter.get('/', authenticateAccess, async (req, res) => {
+  try {
+    const clients = await userService.getClients();
+    res.json(clients);
+  } catch (error) {
+    res.status(error.statusCode ? error.statusCode : 500).json({ message: error.message });
+  }
+});
+
 userRouter.post('/', async (req, res) => {
   try {
     const user = req.body;
@@ -35,27 +44,17 @@ userRouter.post('/logout', async (req, res) => {
       res.json({ message: "User logged out" })
 });
 
-userRouter.put('/', authenticateAccess, async (req, res) => {
+userRouter.put('/:id', authenticateAccess, async (req, res) => {
   try {
     const user = req.body;
-    if (user.id !== req.user.id) throw new RequestError("Prieigos klaida", 403);
-    const updatedUser = userService.put(req.params.id, user);
+    if (req.params.id !== req.user.id) throw new RequestError("Prieigos klaida", 403);
+    const updatedUser = await userService.put(req.params.id, user);
     res.json(updatedUser)
   } catch (error) {
     res.status(error.statusCode ? error.statusCode : 500).json({ message: error.message });
   }
 });
 
-userRouter.get('/', async (req, res) => {
-    res.json("eradsf")
-  //Get all of the saved collections in the database
-//   try {
-//     const data = await Model.find();
-//     res.json(data);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-});
 userRouter.get('/:id', async (req, res) => {
   //Find a specific data collection based on its ID
 //   try {

@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
+  number: {
+    required: true,
+    type: Number,
+  },
   notes: {
     required: false,
     type: String,

@@ -7,7 +7,8 @@ const orderService = new OrderService();
 
 orderRouter.get("/", authenticateAccess, async (req, res) => {
   try {
-    const orders = await orderService.getAll();
+    const { id, role } = req.user;
+    const orders = await orderService.getAll({ role, id, search: req.query.search });
     res.json(orders);
   } catch (error) {
     res

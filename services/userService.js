@@ -9,6 +9,11 @@ require('dotenv').config();
     constructor() {
       this._users = User;
     };
+
+    async getClients() {
+      const clients = await this._users.find({ role: 'client' }).select('-passwordHash');
+      return clients;
+    }
   
      async registerUser(user) {
         const { password, ...newUser } = user;
@@ -17,7 +22,10 @@ require('dotenv').config();
     
         newUser.passwordHash = await bcrypt.hash(password, 10);
         const createdUser = new this._users(newUser);
+        createdUser.fullName = `${user.firstName} ${user.lastName}`
         await createdUser.save();
+        createdUser.passwordHash = '';
+
         return createdUser;
     }
 
@@ -43,7 +51,9 @@ require('dotenv').config();
             expiresIn: "1d",
           }
         );
-        return { user, token};
+        user.passwordHash = ''
+        
+        return { user, token };
       }
 
       async put(id, user) {
@@ -56,8 +66,12 @@ require('dotenv').config();
         if (oldUser.email !== user.email && emailUser !== null)
           throw new RequestError("El. paštas užimtas", 400);
     
+        delete newUser.isVerified
+        delete newUser.role
         Object.assign(oldUser, newUser);
+        oldUser.fullName = `${oldUser.firstName} ${oldUser.lastName}`
         await oldUser.save();
+        oldUser.passwordHash = ''
     
         return oldUser;
       }

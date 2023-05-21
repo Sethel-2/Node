@@ -20,6 +20,7 @@ fileRouter.get("/", authenticateAccess, async (req, res) => {
 fileRouter.post("/", authenticateAccess, uploadFiles, async (req, res) => {
   try {
     const files = req.files;
+    console.log(files)
     fileService.post(files, req.body);
     res.json({ message: "files stored" });
   } catch (error) {

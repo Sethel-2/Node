@@ -27,6 +27,7 @@ app.use(express.json());
 app.use('/user', userRouter)
 app.use('/order', orderRouter)
 app.use('/file', fileRouter)
+app.use(express.json({ limit: '16mb' }));
 
 
 app.listen(3001, () => {

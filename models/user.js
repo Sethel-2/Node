@@ -33,6 +33,13 @@ const userSchema = new mongoose.Schema({
         default: false,
         type: Boolean,
     },
+    fullName: {
+        required: true,
+        type: String,
+    },
+    createdAt: {
+         type: Date,
+          default: new Date() },
 })
 
 module.exports = mongoose.model('User', userSchema)
