@@ -1,10 +1,10 @@
-const dotenv = require('dotenv')
-const jwt = require('jsonwebtoken')
-const RequestError = require('../utils/error')
+import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken'
+import { RequestError } from '../utils/error.js'
 
 dotenv.config();
 
-const authenticateAccess = (
+export const authenticateAccess = (
   req,
   res,
   next
@@ -26,5 +26,3 @@ const authenticateAccess = (
       .json({ message: error.message });
   }
 };
-
-module.exports = authenticateAccess;

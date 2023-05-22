@@ -1,4 +1,4 @@
-const generateRandomId = (length) => {
+export const generateRandomId = (length) => {
   let id = "";
   const digits = "0123456789";
 
@@ -9,5 +9,3 @@ const generateRandomId = (length) => {
 
   return id;
 };
-
-module.exports = generateRandomId;

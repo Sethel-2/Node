@@ -1,9 +1,11 @@
-const User = require("../models/user");
-const RequestError = require ( "../utils/error");
-const bcrypt = require ("bcrypt");
-const jwt = require ("jsonwebtoken");
-require('dotenv').config();
- class UserService {
+import { User } from '../models/user.js'
+import { RequestError } from '../utils/error.js';
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+dotenv.config()
+
+ export class UserService {
     _users;
   
     constructor() {
@@ -76,5 +78,3 @@ require('dotenv').config();
         return oldUser;
       }
   }
-  
-  module.exports = UserService;

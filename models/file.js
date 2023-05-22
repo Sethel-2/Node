@@ -1,8 +1,5 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-
+import mongoose, { Schema } from "mongoose";
 const fileSchema = new Schema({
-  file: Buffer,
   originalname: {
     required: true,
     type: String,
@@ -11,17 +8,21 @@ const fileSchema = new Schema({
     required: true,
     type: String,
   },
-  size: {
-    required: true,
-    type: Number,
-  },
   type: {
     required: true,
     type: String,
     default: "additional",
     enum: ["certificate", "additional"],  
   },
+  filePath: {
+    required: true,
+    type: String,
+  },
+  url: {
+    required: true,
+    type: String,
+  },
   orderId: { type: Schema.Types.ObjectId, required: true, ref: "Order" },
 });
 
-module.exports = mongoose.model("File", fileSchema);
+export const File = mongoose.model("File", fileSchema);

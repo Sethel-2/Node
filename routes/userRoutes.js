@@ -1,9 +1,9 @@
-const { Router } = require ("express");
-const UserService = require ("../services/userService");
-const authenticateAccess = require("../utils/auth");
-const RequestError = require("../utils/error");
+import { Router } from "express";
+import { UserService } from "../services/userService.js";
+import { authenticateAccess } from "../utils/auth.js";
+import { RequestError } from "../utils/error.js";
 
- const userRouter = Router();
+export const userRouter = Router();
 const userService = new UserService();
 
 userRouter.get('/', authenticateAccess, async (req, res) => {
@@ -89,5 +89,3 @@ userRouter.delete('/:id', async (req, res) => {
 //     res.status(400).json({ message: error.message });
 //   }
 });
-
-module.exports = userRouter;

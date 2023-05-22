@@ -1,9 +1,9 @@
-const Order = require("../models/order");
-const User = require("../models/user");
-const RequestError = require("../utils/error");
-const generateRandomId = require("../utils/ids");
+import { Order } from '../models/order.js';
+import { User } from '../models/user.js';
+import { RequestError } from '../utils/error.js';
+import { generateRandomId } from '../utils/ids.js';
 
-class OrderService {
+export class OrderService {
   _orders;
   _users;
 
@@ -62,5 +62,3 @@ class OrderService {
     return order;
   }
 }
-
-module.exports = OrderService;

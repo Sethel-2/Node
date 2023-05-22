@@ -1,8 +1,8 @@
-const { Router } = require("express");
-const OrderService = require("../services/orderService");
-const authenticateAccess = require("../utils/auth");
+import { Router } from 'express'
+import { OrderService } from '../services/orderService.js';
+import { authenticateAccess } from '../utils/auth.js'
 
-const orderRouter = Router();
+export const orderRouter = Router();
 const orderService = new OrderService();
 
 orderRouter.get("/", authenticateAccess, async (req, res) => {
@@ -63,5 +63,3 @@ orderRouter.delete("/:id", authenticateAccess, async (req, res) => {
       .json({ message: error.message });
   }
 });
-
-module.exports = orderRouter;

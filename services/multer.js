@@ -1,5 +1,6 @@
-const multer = require("multer");
+import multer from "multer";
+
 const uploadFiles = multer().array("files");
 const uploadFile = multer().single("file");
 
-module.exports = { uploadFiles, uploadFile };
+export { uploadFiles, uploadFile };

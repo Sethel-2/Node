@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+import mongoose, { Schema } from "mongoose";
 
 const orderSchema = new Schema({
   number: {
@@ -25,4 +24,4 @@ const orderSchema = new Schema({
   createdAt: { type: Date, default: new Date() },
 });
 
-module.exports = mongoose.model("Order", orderSchema);
+export const Order = mongoose.model("Order", orderSchema);

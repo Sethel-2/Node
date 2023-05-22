@@ -1,4 +1,4 @@
- class RequestError extends Error {
+export class RequestError extends Error {
     statusCode;
   
     constructor(message, statusCode) {
@@ -6,4 +6,3 @@
       this.statusCode = statusCode;
     }
   }
-  module.exports = RequestError;

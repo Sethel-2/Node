@@ -1,8 +1,15 @@
-const RequestError = require("../utils/error");
-const File = require("../models/file");
-const Order = require("../models/order");
+import { RequestError } from "../utils/error.js";
+import { File } from "../models/file.js";
+import { Order } from "../models/order.js";
+import { firebaseStorage } from "../utils/firebase.js";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 
-class FileService {
+export class FileService {
   _files;
   _orders;
 
@@ -26,30 +33,37 @@ class FileService {
     return file;
   }
 
-  async post(files, data) {
+  async post(files, { type, orderId }) {
     const createdFiles = await Promise.all(
       files.map(async (file) => {
+        const { filePath, url } = await this.uploadFileToFirestore({
+          file,
+          orderId,
+          type,
+        });
         const createdFile = new this._files({
-          file: file.buffer,
           originalname: file.originalname,
           mimetype: file.mimetype,
-          size: file.size,
-          orderId: data.orderId,
-          type: data.type,
+          type,
+          filePath,
+          url,
+          orderId,
         });
         await createdFile.save();
         return createdFile._id;
       })
     );
-
-    if (data.type === "certificate") {
-      await this._orders.updateOne({
-        _id: data.orderId,
-        certificateFile: createdFiles[0],
-      });
+    
+    if (type === "certificate") {
+      await this._orders.updateOne(
+        { _id: orderId },
+        {
+          certificateFile: createdFiles[0],
+        }
+      );
     } else {
       await this._orders.updateOne(
-        { _id: data.orderId },
+        { _id: orderId },
         {
           $push: { additionalFiles: createdFiles },
         }
@@ -59,36 +73,56 @@ class FileService {
     return createdFiles;
   }
 
-  async put(id, file) {
-    const oldFile = await this._files.findById(id);
-    if (oldFile === null) throw new RequestError("Failas nerastas", 404);
+  // TODO: might not need this
+  // async put(id, file) {
+  //   const oldFile = await this._files.findById(id);
+  //   if (oldFile === null) throw new RequestError("Failas nerastas", 404);
 
-    Object.assign(oldFile, file);
-    await oldFile.save();
+  //   Object.assign(oldFile, file);
+  //   await oldFile.save();
 
-    return oldFile;
-  }
+  //   return oldFile;
+  // }
 
   async delete(id) {
-    const deletedFile = await this._files.findByIdAndDelete(id);
-    if (!deletedFile) throw new RequestError("Failas nerastas", 404);
+    const fileToDelete = await this._files.findById(id);
+    if (!fileToDelete) throw new RequestError("Failas nerastas", 404);
 
-    if (deletedFile.type === "certificate") {
-      await this._orders.updateOne({
-        _id: deletedFile.orderId,
-        certificateFile: null,
-      });
+    await this.deleteFileFromFirestore(fileToDelete.filePath);
+    await fileToDelete.deleteOne();
+
+    if (fileToDelete.type === "certificate") {
+      await this._orders.updateOne(
+        {
+          _id: fileToDelete.orderId,
+        },
+        {
+          certificateFile: null,
+        }
+      );
     } else {
       await this._orders.updateOne(
-        { _id: deletedFile.orderId },
+        { _id: fileToDelete.orderId },
         {
-          $pull: { additionalFiles: deletedFile._id },
+          $pull: { additionalFiles: fileToDelete._id },
         }
       );
     }
 
-    return deletedFile;
+    return fileToDelete;
+  }
+
+  async uploadFileToFirestore(data) {
+    const { file, orderId, type } = data;
+    const filePath = `order_${orderId}/${type}/${file.originalname}`;
+    const fileRef = ref(firebaseStorage, filePath);
+    await uploadBytesResumable(fileRef, file.buffer);
+    const url = await getDownloadURL(fileRef);
+    return { filePath, url };
+  }
+
+  async deleteFileFromFirestore(filePath) {
+    const fileRef = ref(firebaseStorage, filePath);
+    await deleteObject(fileRef);
   }
 }
-
-module.exports = FileService;
