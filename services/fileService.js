@@ -50,7 +50,7 @@ export class FileService {
           orderId,
         });
         await createdFile.save();
-        return createdFile._id;
+        return createdFile;
       })
     );
     
@@ -58,14 +58,14 @@ export class FileService {
       await this._orders.updateOne(
         { _id: orderId },
         {
-          certificateFile: createdFiles[0],
+          certificateFile: createdFiles[0]._id,
         }
       );
     } else {
       await this._orders.updateOne(
         { _id: orderId },
         {
-          $push: { additionalFiles: createdFiles },
+          $push: { additionalFiles: createdFiles.map(createdFile => createdFile._id) },
         }
       );
     }
@@ -73,16 +73,7 @@ export class FileService {
     return createdFiles;
   }
 
-  // TODO: might not need this
-  // async put(id, file) {
-  //   const oldFile = await this._files.findById(id);
-  //   if (oldFile === null) throw new RequestError("Failas nerastas", 404);
-
-  //   Object.assign(oldFile, file);
-  //   await oldFile.save();
-
-  //   return oldFile;
-  // }
+ 
 
   async delete(id) {
     const fileToDelete = await this._files.findById(id);
