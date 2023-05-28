@@ -29,10 +29,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         type: String,
     },
-    isVerified: {
-        default: false,
-        type: Boolean,
-    },
     fullName: {
         required: true,
         type: String,

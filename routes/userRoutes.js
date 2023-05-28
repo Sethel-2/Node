@@ -8,8 +8,20 @@ const userService = new UserService();
 
 userRouter.get('/', authenticateAccess, async (req, res) => {
   try {
-    const clients = await userService.getClients();
-    res.json(clients);
+    const search = req.query.search;
+    const page = req.query.page || 1;
+    const createdFrom = req.query.from ? new Date(parseInt(req.query.from)) : undefined;
+    const createdTo = req.query.to ? new Date(parseInt(req.query.to)) : undefined;
+    const showAll = req.query.showAll;
+    const { clients, nextPageExists } = showAll
+    ? await userService.getAllClients()
+    : await userService.getClients({
+        search,
+        page: page - 1,
+        from: createdFrom,
+        to: createdTo,
+      });
+    res.json({ clients, nextPageExists });
   } catch (error) {
     res.status(error.statusCode ? error.statusCode : 500).json({ message: error.message });
   }
@@ -44,6 +56,26 @@ userRouter.post('/logout', async (req, res) => {
       res.json({ message: "User logged out" })
 });
 
+userRouter.post('/remind-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+      await userService.remindPassword(email);
+      res.json({ message: "Laiškas išsiųstas" });
+    } catch (error) {
+      res.status(error.statusCode ? error.statusCode : 500).json({ message: error.message });
+    }
+})
+
+userRouter.post('/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    await userService.resetPassword(password, token);
+    res.json({ message: "Slaptažodis atnaujintas"});
+  } catch (error) {
+    res.status(error.statusCode ? error.statusCode : 500).json({ message: error.message });
+  }
+})
+
 userRouter.put('/:id', authenticateAccess, async (req, res) => {
   try {
     const user = req.body;
@@ -55,37 +87,3 @@ userRouter.put('/:id', authenticateAccess, async (req, res) => {
   }
 });
 
-userRouter.get('/:id', async (req, res) => {
-  //Find a specific data collection based on its ID
-//   try {
-//     const data = await Model.findById(req.params.id);
-//     res.json(data);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-});
-
-//Update by ID Method
-userRouter.put('/:id', async (req, res) => {
-//   try {
-//     const id = req.params.id;
-//     const updatedData = req.body;
-//     const options = { new: true };
-
-//     const result = await Model.findByIdAndUpdate(id, updatedData, options);
-
-//     res.send(result);
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-});
-
-userRouter.delete('/:id', async (req, res) => {
-//   try {
-//     const id = req.params.id;
-//     const data = await Model.findByIdAndDelete(id);
-//     res.send(`Document with ${data.name} has been deleted..`);
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-});

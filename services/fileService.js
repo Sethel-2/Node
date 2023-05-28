@@ -36,19 +36,20 @@ export class FileService {
   async post(files, { type, orderId }) {
     const createdFiles = await Promise.all(
       files.map(async (file) => {
-        const { filePath, url } = await this.uploadFileToFirestore({
-          file,
-          orderId,
-          type,
-        });
         const createdFile = new this._files({
           originalname: file.originalname,
           mimetype: file.mimetype,
           type,
-          filePath,
-          url,
           orderId,
         });
+        const { filePath, url } = await this.uploadFileToFirestore({
+          id: createdFile._id,
+          file,
+          orderId,
+          type,
+        });
+        createdFile.filePath = filePath;
+        createdFile.url = url;
         await createdFile.save();
         return createdFile;
       })
@@ -103,9 +104,15 @@ export class FileService {
     return fileToDelete;
   }
 
+  async deleteMany(ids) {
+    return await Promise.all(ids.map(async id => {
+      return await this.delete(id)
+    }))
+  }
+
   async uploadFileToFirestore(data) {
-    const { file, orderId, type } = data;
-    const filePath = `order_${orderId}/${type}/${file.originalname}`;
+    const { id, file, orderId, type } = data;
+    const filePath = `order_${orderId}/${type}/${id}_${file.originalname}`;
     const fileRef = ref(firebaseStorage, filePath);
     await uploadBytesResumable(fileRef, file.buffer);
     const url = await getDownloadURL(fileRef);
